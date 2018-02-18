@@ -1,6 +1,7 @@
 package ru.javaops.masterjava.matrix;
 
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -14,6 +15,23 @@ public class MatrixUtil {
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
+        
+        final int amount = 10;
+        
+        executor.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                int c = 0;
+
+                for (int i = 0; i < matrixSize; i++) {
+                    for (int j = 0; j < matrixSize; j++) {
+                        
+                    }
+                }
+
+                return 0;
+            }
+        });
 
         return matrixC;
     }
