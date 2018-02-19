@@ -77,22 +77,22 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
 
-        final int[][] matrixBTransposed = new int[matrixSize][matrixSize];
+        final int[] rowB = new int[matrixSize];
 
         for (int i = 0; i < matrixSize; i++) {
+
             for (int j = 0; j < matrixSize; j++) {
-                matrixBTransposed[j][i] = matrixB[i][j];
+                rowB[j] = matrixB[j][i];
             }
-        }
 
-        for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
+                int[] rowA = matrixA[j];
                 int sum = 0;
                 for (int k = 0; k < matrixSize; k++) {
                     //sum += matrixA[i][k] * matrixB[k][j];
-                    sum += matrixA[i][k] * matrixBTransposed[j][k];
+                    sum += rowA[k] * rowB[k];
                 }
-                matrixC[i][j] = sum;
+                matrixC[j][i] = sum;
             }
         }
         return matrixC;
