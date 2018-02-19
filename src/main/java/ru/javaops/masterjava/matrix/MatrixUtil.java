@@ -1,9 +1,9 @@
 package ru.javaops.masterjava.matrix;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
 
 /**
  * gkislin
@@ -15,23 +15,59 @@ public class MatrixUtil {
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
-        
-        final int amount = 10;
-        
-        executor.submit(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                int c = 0;
 
-                for (int i = 0; i < matrixSize; i++) {
+        final int[][] matrixBTransposed = new int[matrixSize][matrixSize];
+
+        for (int j = 0; j < matrixSize; j++) {
+            for (int k = 0; k < matrixSize; k++) {
+                matrixBTransposed[k][j] = matrixB[j][k];
+            }
+        }
+
+        class ThreadResult {
+            final int rowIndex;
+            final int[] row;
+
+            public ThreadResult(int rowIndex, int[] row) {
+                this.rowIndex = rowIndex;
+                this.row = row;
+            }
+        }
+
+        final CompletionService<ThreadResult> completionService = new ExecutorCompletionService<>(executor);
+
+        List<Future<ThreadResult>> submits = new ArrayList<>();
+
+        for (int i = 0; i < matrixSize; i++) {
+            final int currentRow = i;
+            final int[] row = matrixA[i];
+
+            final Future<ThreadResult> submit = completionService.submit(() -> {
+                int[] cRow = new int[matrixSize];
+
+                for (int i1 = 0; i1 < matrixSize; i1++) {
+                    cRow[i1] = 0;
                     for (int j = 0; j < matrixSize; j++) {
-                        
+                        cRow[i1] += row[j] * matrixBTransposed[i1][j];
                     }
                 }
 
-                return 0;
+                return new ThreadResult(currentRow, cRow);
+            });
+            submits.add(submit);
+        }
+
+        while (!submits.isEmpty()) {
+
+            final Future<ThreadResult> submit = completionService.poll(10, TimeUnit.SECONDS);
+
+            if (submit == null) {
+                throw new InterruptedException("submit is null");
             }
-        });
+            submits.remove(submit);
+            final ThreadResult threadResult = submit.get();
+            matrixC[threadResult.rowIndex] = threadResult.row;
+        }
 
         return matrixC;
     }
