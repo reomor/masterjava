@@ -45,10 +45,10 @@ public class MatrixUtil {
             final Future<ThreadResult> submit = completionService.submit(() -> {
                 int[] cRow = new int[matrixSize];
 
-                for (int i1 = 0; i1 < matrixSize; i1++) {
-                    cRow[i1] = 0;
+                for (int ii = 0; ii < matrixSize; ii++) {
+                    cRow[ii] = 0;
                     for (int j = 0; j < matrixSize; j++) {
-                        cRow[i1] += row[j] * matrixBTransposed[i1][j];
+                        cRow[ii] += row[j] * matrixBTransposed[ii][j];
                     }
                 }
 
@@ -77,11 +77,20 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
 
+        final int[][] matrixBTransposed = new int[matrixSize][matrixSize];
+
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                matrixBTransposed[j][i] = matrixB[i][j];
+            }
+        }
+
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
                 int sum = 0;
                 for (int k = 0; k < matrixSize; k++) {
-                    sum += matrixA[i][k] * matrixB[k][j];
+                    //sum += matrixA[i][k] * matrixB[k][j];
+                    sum += matrixA[i][k] * matrixBTransposed[j][k];
                 }
                 matrixC[i][j] = sum;
             }
