@@ -14,15 +14,15 @@
         </Project>
     </Projects>
 
-    <Cities>
-        <City id="spb">Санкт-Петербург</City>
-        <City id="kiv">Киев</City>
-        <City id="mnsk">Минск</City>
-    </Cities>
-
     <Users>
         <User flag="superuser" city="spb" email="admin@javaops.ru">Admin</User>
         <User flag="active" city="kiv" email="gmail@gmail.com" groups="topjava01">Full Name</User>
         <User flag="deleted" city="spb" email="mail@yandex.ru">Deleted</User>
     </Users>
+
+    <Cities>
+        <City id="spb">Санкт-Петербург</City>
+        <City id="kiv">Киев</City>
+        <City id="mnsk">Минск</City>
+    </Cities>
 </Payload>
