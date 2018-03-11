@@ -18,6 +18,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static j2html.TagCreator.*;
+
 public class MainXml {
 
     public static void main(String[] args) throws Exception {
@@ -29,7 +31,8 @@ public class MainXml {
         findUsersByProjectJaxb("masterjava", resourceUrl, resourceSchema);
 //*/
         findUsersByProjectStax("masterjava", resourceUrl);
-        //findUsersByProjectStax("basejava", resourceUrl);
+        findUsersByProjectStax("basejava", resourceUrl);
+        findUsersByProjectStax("topjava", resourceUrl);
     }
 
     public static void findUsersByProjectJaxb(String projectName, URL resourceUrl, Schema resourceSchema) throws Exception {
@@ -64,8 +67,10 @@ public class MainXml {
         printSet(projectUsers);
     }
 
-    private static String PROJECTSTAG = "Projects";
-    private static String USERSTAG = "Users";
+    private static String PROJECTS_TAG = "Projects";
+    private static String PROJECT_TAG = "Project";
+    private static String USERS_TAG = "Users";
+    private static String USER_TAG = "User";
 
     public static void findUsersByProjectStax(String projectName, URL resourceUrl) throws Exception {
         Set<User> projectUsers = new TreeSet<>(Comparator.comparing(User::getEmail));
@@ -74,16 +79,19 @@ public class MainXml {
             XMLStreamReader reader = processor.getReader();
             Set<String> groupNames = new HashSet<>();
 
-            processor.doUntil(XMLEvent.START_ELEMENT, PROJECTSTAG);
-            while(processor.doUntilFindTag("Project", PROJECTSTAG, USERSTAG)) {
+            processor.doUntil(XMLEvent.START_ELEMENT, PROJECTS_TAG);
+            while(processor.doUntilFindTag("Project", PROJECTS_TAG, USERS_TAG)) {
                 if (processor.getAttributeValue("name").equals(projectName)) {
-                    while (processor.doUntilFindTag("Group", PROJECTSTAG, USERSTAG)) {
+                    while (processor.doUntilFindTag("Group", PROJECT_TAG, PROJECTS_TAG, USERS_TAG)) {
                         groupNames.add(processor.getAttributeValue("name"));
                     }
                 }
             }
             //System.out.println(reader.getLocalName());
-            while (processor.doUntilFindTag("User", USERSTAG)) {
+            //go to users, stop if user
+            processor.doUntilFindTag(USERS_TAG, USER_TAG);
+
+            while (processor.doUntilFindTag("User", USERS_TAG)) {
                 String[] groups = processor.getAttributeValue("groups").split(" ");
                 for (String group : groups) {
                     if (groupNames.contains(group)) {
@@ -98,6 +106,18 @@ public class MainXml {
         }
 
         printSet(projectUsers);
+
+        final String html = body(
+                h1("table " + projectName),
+                table(
+                        each(projectUsers, user -> tr(
+                                td(user.getValue()),
+                                td(user.getEmail())
+                        ))
+                )
+        ).render();
+
+        System.out.println(html);
     }
 
     private static <T extends User> void printSet(Set<T> set) {
